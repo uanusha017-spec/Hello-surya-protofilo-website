@@ -1,0 +1,359 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Reusable Hardened Primitives ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedEmail() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedEmail() &&
+        request.auth.token.email is string && (
+          request.auth.token.email.lower() == 'uanusha017@gmail.com' ||
+          request.auth.token.email.lower() == 'youanusha1997@gmail.com'
+        );
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isVerifiedEmail() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidStringList(listVal, maxItems) {
+      return listVal is list &&
+        listVal.size() >= 1 &&
+        listVal.size() <= maxItems &&
+        listVal[0] is string &&
+        listVal[0].size() >= 1 &&
+        listVal[0].size() <= 160;
+    }
+
+    // --- Validation Blueprints ---
+    function isValidProject(data) {
+      return data.keys().hasAll([
+          'index', 'title', 'subtitle', 'category', 'discipline', 'location',
+          'year', 'liveUrl', 'displayDomain', 'image', 'imageAlt', 'summary',
+          'challenge', 'approach', 'deliverables', 'platform', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'index', 'title', 'subtitle', 'category', 'discipline', 'location',
+          'year', 'liveUrl', 'displayDomain', 'image', 'imageAlt', 'summary',
+          'challenge', 'approach', 'deliverables', 'platform', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.index is string && data.index.size() >= 1 && data.index.size() <= 8 &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 120 &&
+        data.subtitle is string && data.subtitle.size() >= 2 && data.subtitle.size() <= 180 &&
+        data.category is string && data.category in [
+          'Architecture & Real Estate',
+          'Wellness & Hospitality',
+          'Commerce & Systems',
+          'Custom Web Apps'
+        ] &&
+        data.discipline is string && data.discipline.size() >= 2 && data.discipline.size() <= 80 &&
+        data.location is string && data.location.size() >= 2 && data.location.size() <= 80 &&
+        data.year is string && data.year.size() >= 4 && data.year.size() <= 12 &&
+        data.liveUrl is string && data.liveUrl.size() >= 8 && data.liveUrl.size() <= 400 && data.liveUrl.matches('^https?://.+') &&
+        data.displayDomain is string && data.displayDomain.size() >= 3 && data.displayDomain.size() <= 160 &&
+        data.image is string && data.image.size() >= 1 && data.image.size() <= 500 &&
+        data.imageAlt is string && data.imageAlt.size() >= 2 && data.imageAlt.size() <= 240 &&
+        data.summary is string && data.summary.size() >= 10 && data.summary.size() <= 600 &&
+        data.challenge is string && data.challenge.size() >= 5 && data.challenge.size() <= 1200 &&
+        data.approach is string && data.approach.size() >= 5 && data.approach.size() <= 1200 &&
+        isValidStringList(data.deliverables, 8) &&
+        data.platform is string && data.platform.size() >= 2 && data.platform.size() <= 60 &&
+        data.order is number && data.order >= 0 && data.order <= 1000 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidService(data) {
+      return data.keys().hasAll([
+          'index', 'title', 'tagline', 'phase', 'description',
+          'deliverables', 'timeline', 'idealFor', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'index', 'title', 'tagline', 'phase', 'description',
+          'deliverables', 'timeline', 'idealFor', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.index is string && data.index.size() >= 1 && data.index.size() <= 8 &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 120 &&
+        data.tagline is string && data.tagline.size() >= 2 && data.tagline.size() <= 180 &&
+        data.phase is string && data.phase in ['Design', 'Develop', 'Deliver', 'End-to-End'] &&
+        data.description is string && data.description.size() >= 10 && data.description.size() <= 900 &&
+        isValidStringList(data.deliverables, 8) &&
+        data.timeline is string && data.timeline.size() >= 2 && data.timeline.size() <= 60 &&
+        data.idealFor is string && data.idealFor.size() >= 2 && data.idealFor.size() <= 160 &&
+        data.order is number && data.order >= 0 && data.order <= 1000 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidExperience(data) {
+      return data.keys().hasAll([
+          'index', 'role', 'organization', 'type', 'duration',
+          'location', 'summary', 'current', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'index', 'role', 'organization', 'type', 'duration',
+          'location', 'summary', 'current', 'order',
+          'createdAt', 'updatedAt'
+        ]) &&
+        data.index is string && data.index.size() >= 1 && data.index.size() <= 8 &&
+        data.role is string && data.role.size() >= 2 && data.role.size() <= 120 &&
+        data.organization is string && data.organization.size() >= 2 && data.organization.size() <= 120 &&
+        data.type is string && data.type in ['Industry', 'Teaching', 'Online Teaching'] &&
+        data.duration is string && data.duration.size() >= 2 && data.duration.size() <= 60 &&
+        data.location is string && data.location.size() >= 2 && data.location.size() <= 80 &&
+        data.summary is string && data.summary.size() >= 10 && data.summary.size() <= 700 &&
+        data.current is bool &&
+        data.order is number && data.order >= 0 && data.order <= 1000 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidSiteConfig(data) {
+      return data.keys().hasAll([
+          'studioName', 'tagline', 'businessEmail', 'businessPhone', 'location',
+          'heroHeadline', 'heroLead', 'aboutHeadline', 'aboutSummary',
+          'aboutExtended', 'mcaDegree', 'mcaInstitution', 'bcaDegree',
+          'bcaInstitution', 'founderPhoto', 'missionTitle', 'missionStatement',
+          'visionTitle', 'visionStatement', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'studioName', 'tagline', 'businessEmail', 'businessPhone', 'location',
+          'heroHeadline', 'heroLead', 'aboutHeadline', 'aboutSummary',
+          'aboutExtended', 'mcaDegree', 'mcaInstitution', 'bcaDegree',
+          'bcaInstitution', 'founderPhoto', 'missionTitle', 'missionStatement',
+          'visionTitle', 'visionStatement', 'updatedAt'
+        ]) &&
+        data.studioName is string && data.studioName.size() >= 2 && data.studioName.size() <= 100 &&
+        data.tagline is string && data.tagline.size() >= 2 && data.tagline.size() <= 140 &&
+        data.businessEmail is string && data.businessEmail.size() >= 5 && data.businessEmail.size() <= 120 && data.businessEmail.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$') &&
+        data.businessPhone is string && data.businessPhone.size() >= 7 && data.businessPhone.size() <= 30 &&
+        data.location is string && data.location.size() >= 2 && data.location.size() <= 120 &&
+        data.heroHeadline is string && data.heroHeadline.size() >= 5 && data.heroHeadline.size() <= 180 &&
+        data.heroLead is string && data.heroLead.size() >= 10 && data.heroLead.size() <= 500 &&
+        data.aboutHeadline is string && data.aboutHeadline.size() >= 5 && data.aboutHeadline.size() <= 180 &&
+        data.aboutSummary is string && data.aboutSummary.size() >= 10 && data.aboutSummary.size() <= 800 &&
+        data.aboutExtended is string && data.aboutExtended.size() >= 10 && data.aboutExtended.size() <= 1500 &&
+        data.mcaDegree is string && data.mcaDegree.size() >= 3 && data.mcaDegree.size() <= 160 &&
+        data.mcaInstitution is string && data.mcaInstitution.size() >= 3 && data.mcaInstitution.size() <= 140 &&
+        data.bcaDegree is string && data.bcaDegree.size() >= 3 && data.bcaDegree.size() <= 160 &&
+        data.bcaInstitution is string && data.bcaInstitution.size() >= 3 && data.bcaInstitution.size() <= 140 &&
+        data.founderPhoto is string && data.founderPhoto.size() >= 1 && data.founderPhoto.size() <= 500 &&
+        data.missionTitle is string && data.missionTitle.size() >= 5 && data.missionTitle.size() <= 160 &&
+        data.missionStatement is string && data.missionStatement.size() >= 10 && data.missionStatement.size() <= 900 &&
+        data.visionTitle is string && data.visionTitle.size() >= 5 && data.visionTitle.size() <= 160 &&
+        data.visionStatement is string && data.visionStatement.size() >= 10 && data.visionStatement.size() <= 900 &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll([
+          'name', 'email', 'phone', 'projectType', 'message',
+          'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'name', 'email', 'phone', 'projectType', 'message',
+          'status', 'createdAt', 'updatedAt'
+        ]) &&
+        data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+        data.email is string && data.email.size() >= 5 && data.email.size() <= 120 && data.email.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$') &&
+        data.phone is string && data.phone.size() <= 30 &&
+        data.projectType is string && data.projectType.size() >= 2 && data.projectType.size() <= 100 &&
+        data.message is string && data.message.size() >= 5 && data.message.size() <= 2000 &&
+        data.status is string && data.status in ['new', 'reviewed', 'replied', 'archived'] &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidAdminDoc(data) {
+      return data.keys().hasAll(['email', 'addedAt']) &&
+        data.keys().hasOnly(['email', 'addedAt']) &&
+        data.email is string && data.email.size() >= 5 && data.email.size() <= 120 &&
+        data.addedAt is timestamp;
+    }
+
+    // --- Collection Rules ---
+
+    // 1. Portfolio Projects (Publicly viewable showcase, Admin-only management)
+    match /projects/{projectId} {
+      allow get: if isValidId(projectId);
+      allow list: if true;
+
+      allow create: if isSignedIn() &&
+        isValidId(projectId) &&
+        isValidProject(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isSignedIn() &&
+        isValidId(projectId) &&
+        isValidProject(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'index', 'title', 'subtitle', 'category', 'discipline', 'location',
+          'year', 'liveUrl', 'displayDomain', 'image', 'imageAlt', 'summary',
+          'challenge', 'approach', 'deliverables', 'platform', 'order', 'updatedAt'
+        ]) &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(projectId) && isAdmin();
+    }
+
+    // 2. End-to-End Services (Publicly viewable catalog, Admin-only management)
+    match /services/{serviceId} {
+      allow get: if isValidId(serviceId);
+      allow list: if true;
+
+      allow create: if isSignedIn() &&
+        isValidId(serviceId) &&
+        isValidService(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isSignedIn() &&
+        isValidId(serviceId) &&
+        isValidService(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'index', 'title', 'tagline', 'phase', 'description',
+          'deliverables', 'timeline', 'idealFor', 'order', 'updatedAt'
+        ]) &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(serviceId) && isAdmin();
+    }
+
+    // 3. Teaching & IT Industry Experiences (Publicly viewable, Admin-only management)
+    match /experiences/{experienceId} {
+      allow get: if isValidId(experienceId);
+      allow list: if true;
+
+      allow create: if isSignedIn() &&
+        isValidId(experienceId) &&
+        isValidExperience(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isSignedIn() &&
+        isValidId(experienceId) &&
+        isValidExperience(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'index', 'role', 'organization', 'type', 'duration',
+          'location', 'summary', 'current', 'order', 'updatedAt'
+        ]) &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(experienceId) && isAdmin();
+    }
+
+    // 4. Public Site Config (Contact info, Bio, Qualifications, Photo - Admin-only edits)
+    match /siteConfig/{configId} {
+      allow get: if isValidId(configId) && configId == 'main';
+      allow list: if false;
+
+      allow create: if isSignedIn() &&
+        isValidId(configId) &&
+        configId == 'main' &&
+        isValidSiteConfig(incoming()) &&
+        incoming().updatedAt == request.time &&
+        isAdmin();
+
+      allow update: if isSignedIn() &&
+        isValidId(configId) &&
+        configId == 'main' &&
+        isValidSiteConfig(incoming()) &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'studioName', 'tagline', 'businessEmail', 'businessPhone', 'location',
+          'heroHeadline', 'heroLead', 'aboutHeadline', 'aboutSummary',
+          'aboutExtended', 'mcaDegree', 'mcaInstitution', 'bcaDegree',
+          'bcaInstitution', 'founderPhoto', 'missionTitle', 'missionStatement',
+          'visionTitle', 'visionStatement', 'updatedAt'
+        ]) &&
+        isAdmin();
+
+      allow delete: if false;
+    }
+
+    // 5. Visitor Inquiries (Public create only; strictly Admin-only read/update/delete to isolate PII)
+    match /inquiries/{inquiryId} {
+      allow get: if isSignedIn() && isValidId(inquiryId) && isAdmin();
+      allow list: if isSignedIn() && isBootstrappedAdmin();
+
+      allow create: if isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().status == 'new' &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isSignedIn() &&
+        isValidId(inquiryId) &&
+        isValidInquiry(incoming()) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().name == existing().name &&
+        incoming().email == existing().email &&
+        incoming().phone == existing().phone &&
+        incoming().projectType == existing().projectType &&
+        incoming().message == existing().message &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+        isAdmin();
+
+      allow delete: if isSignedIn() && isValidId(inquiryId) && isAdmin();
+    }
+
+    // 6. Admin Registry (Strictly Admin-only)
+    match /admins/{uid} {
+      allow get: if isSignedIn() && isValidId(uid) && (request.auth.uid == uid || isAdmin());
+      allow list: if isSignedIn() && isBootstrappedAdmin();
+
+      allow create: if isSignedIn() &&
+        isValidId(uid) &&
+        isValidAdminDoc(incoming()) &&
+        incoming().addedAt == request.time &&
+        isAdmin();
+
+      allow update: if false;
+      allow delete: if isSignedIn() && isValidId(uid) && isAdmin();
+    }
+  }
+}

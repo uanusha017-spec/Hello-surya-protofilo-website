@@ -1,0 +1,484 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A live portfolio website or application showcased by HK Surya Digital Solutions.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "string",
+          "maxLength": 8,
+          "description": "Two-digit editorial display index (e.g. 01)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Project title"
+        },
+        "subtitle": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 180,
+          "description": "Short project tagline"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Architecture & Real Estate",
+            "Wellness & Hospitality",
+            "Commerce & Systems",
+            "Custom Web Apps"
+          ],
+          "description": "Portfolio filter category"
+        },
+        "discipline": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Primary craft discipline"
+        },
+        "location": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80,
+          "description": "Client location or context"
+        },
+        "year": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 12,
+          "description": "Delivery year"
+        },
+        "liveUrl": {
+          "type": "string",
+          "maxLength": 400,
+          "pattern": "^https?://.+",
+          "description": "External live demo URL"
+        },
+        "displayDomain": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Clean domain label for directory display"
+        },
+        "image": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Cover image path or URL"
+        },
+        "imageAlt": {
+          "type": "string",
+          "maxLength": 240,
+          "description": "Accessible image description"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 600,
+          "description": "Brief overview shown on portfolio cards"
+        },
+        "challenge": {
+          "type": "string",
+          "maxLength": 1200,
+          "description": "Case study problem statement"
+        },
+        "approach": {
+          "type": "string",
+          "maxLength": 1200,
+          "description": "Design and engineering approach"
+        },
+        "deliverables": {
+          "type": "array",
+          "description": "Up to 8 concise deliverables"
+        },
+        "platform": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Production hosting platform"
+        },
+        "order": {
+          "type": "number",
+          "description": "Display sort order"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last update timestamp"
+        }
+      },
+      "required": [
+        "index",
+        "title",
+        "subtitle",
+        "category",
+        "discipline",
+        "location",
+        "year",
+        "liveUrl",
+        "displayDomain",
+        "image",
+        "imageAlt",
+        "summary",
+        "challenge",
+        "approach",
+        "deliverables",
+        "platform",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "An end-to-end digital service offering displayed on the Services page.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "string",
+          "maxLength": 8,
+          "description": "Editorial index (e.g. 01)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120,
+          "description": "Service title"
+        },
+        "tagline": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 180,
+          "description": "Short subtitle"
+        },
+        "phase": {
+          "type": "string",
+          "enum": ["Design", "Develop", "Deliver", "End-to-End"],
+          "description": "Lifecycle phase"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 900,
+          "description": "Full service overview"
+        },
+        "deliverables": {
+          "type": "array",
+          "description": "Up to 8 included deliverables"
+        },
+        "timeline": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Typical turnaround estimate"
+        },
+        "idealFor": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Target client fit"
+        },
+        "order": {
+          "type": "number",
+          "description": "Display sort order"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp"
+        }
+      },
+      "required": [
+        "index",
+        "title",
+        "tagline",
+        "phase",
+        "description",
+        "deliverables",
+        "timeline",
+        "idealFor",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SiteConfig": {
+      "title": "SiteConfig",
+      "description": "Public studio configuration, contact details, bio, and qualifications editable from the Admin Panel.",
+      "type": "object",
+      "properties": {
+        "studioName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "tagline": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "businessEmail": {
+          "type": "string",
+          "maxLength": 120,
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+        },
+        "businessPhone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "heroHeadline": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "heroLead": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "aboutHeadline": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "aboutSummary": {
+          "type": "string",
+          "maxLength": 800
+        },
+        "aboutExtended": {
+          "type": "string",
+          "maxLength": 1500
+        },
+        "mcaDegree": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "mcaInstitution": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "bcaDegree": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "bcaInstitution": {
+          "type": "string",
+          "maxLength": 140
+        },
+        "founderPhoto": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "missionTitle": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "missionStatement": {
+          "type": "string",
+          "maxLength": 900
+        },
+        "visionTitle": {
+          "type": "string",
+          "maxLength": 160
+        },
+        "visionStatement": {
+          "type": "string",
+          "maxLength": 900
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "studioName",
+        "tagline",
+        "businessEmail",
+        "businessPhone",
+        "location",
+        "heroHeadline",
+        "heroLead",
+        "aboutHeadline",
+        "aboutSummary",
+        "aboutExtended",
+        "mcaDegree",
+        "mcaInstitution",
+        "bcaDegree",
+        "bcaInstitution",
+        "founderPhoto",
+        "missionTitle",
+        "missionStatement",
+        "visionTitle",
+        "visionStatement",
+        "updatedAt"
+      ]
+    },
+    "Experience": {
+      "title": "Experience",
+      "description": "Industry, school/college teaching, and online instruction experience displayed dynamically on Home and About Us pages.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "string",
+          "maxLength": 8
+        },
+        "role": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "organization": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Industry", "Teaching", "Online Teaching"]
+        },
+        "duration": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "location": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 700
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "order": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "index",
+        "role",
+        "organization",
+        "type",
+        "duration",
+        "location",
+        "summary",
+        "current",
+        "order",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Visitor contact and project inquiry submission visible strictly to administrators.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120,
+          "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "projectType": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "message": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 2000
+        },
+        "status": {
+          "type": "string",
+          "enum": ["new", "reviewed", "replied", "archived"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "phone",
+        "projectType",
+        "message",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized admin record keyed by Firebase Auth UID.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "addedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["email", "addedAt"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Publicly readable portfolio projects managed exclusively by verified admins."
+    },
+    "/services/{serviceId}": {
+      "schema": { "$ref": "#/entities/Service" },
+      "description": "Publicly readable end-to-end services managed exclusively by verified admins."
+    },
+    "/experiences/{experienceId}": {
+      "schema": { "$ref": "#/entities/Experience" },
+      "description": "Publicly readable teaching and IT industry experience records managed exclusively by verified admins."
+    },
+    "/siteConfig/{configId}": {
+      "schema": { "$ref": "#/entities/SiteConfig" },
+      "description": "Public studio configuration, bio, qualifications, and business contact details."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Visitor contact form submissions. Public create with strict schema validation; admin-only read/update/delete."
+    },
+    "/admins/{uid}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Trusted admin role registry. Strictly admin-only read and write."
+    }
+  }
+}
